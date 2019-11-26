@@ -97,6 +97,12 @@
                 detector.start();
             }
             log('#logs', "Clicked the start button");
+            
+            let body = { "value1" : "😀" };
+            
+            $.post( "https://maker.ifttt.com/trigger/Emotion%20Detected%3A/with/key/crAxJRHqlU_bbO8P1K651Hr-hHYE9yk7mFi2AnMg7iI", body, function( data ) {
+                console.log("response: " + data);
+            });
         }
 
         //function executes when the Stop button is pushed.
@@ -142,8 +148,7 @@
             $('#results').html("");
             log('#results', "Timestamp: " + timestamp.toFixed(2));
             log('#results', "Number of faces found: " + faces.length);
-            if (faces.length > 0) {
-                
+            if (faces.length > 0) {                
                 console.log(faces[0]);
                 
                 log('#results', "Appearance: " + JSON.stringify(faces[0].appearance));
