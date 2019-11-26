@@ -71,6 +71,9 @@
         var faceMode = affdex.FaceDetectorMode.LARGE_FACES;
         //Construct a CameraDetector and specify the image width / height and face detector mode.
         var detector = new affdex.CameraDetector(divRoot, width, height, faceMode);
+        var millisecondsValenceInRange = 0;
+        var previousTimestamp = 0;
+        var timestampOfLastNotification = 0;
 
         //Enable detection of all Expressions, Emotions and Emojis classifiers.
         detector.detectAllEmotions();
@@ -97,10 +100,6 @@
                 detector.start();
             }
             log('#logs', "Clicked the start button");
-            
-            let body = { "value1" : "😀" };
-            
-            $.post("https://maker.ifttt.com/trigger/Emotion%20Detected%3A/with/key/crAxJRHqlU_bbO8P1K651Hr-hHYE9yk7mFi2AnMg7iI", body);
         }
 
         //function executes when the Stop button is pushed.
@@ -159,8 +158,60 @@
                 log('#results', "Emoji: " + faces[0].emojis.dominantEmoji);
                 if ($('#face_video_canvas')[0] != null)
                     drawFeaturePoints(image, faces[0].featurePoints);
+                
+                sendNotification(faces);
             }
         });
+        
+        function sendNotification(faces)
+        {
+            //debug less than
+            if(faces[0].emotions && faces[0].emotions.valence > -10)
+            {
+                let currentTimestamp = Date.now();
+                
+                if(!previousTimestamp)
+                {
+                    previousTimestamp = currentTimestamp;
+                }
+            
+                let elapsedTime = currentTimestamp - previousTimestamp;
+                
+                millisecondsValenceInRange += elapsedTime;                
+                previousTimestamp = currentTimestamp;
+                
+                log('#logs', "elapsed time in range is " + millisecondsValenceInRange);                
+                
+                if(millisecondsValenceInRange >= 2000)
+                {
+                    //to avoid sending too many notifications
+                    let timeSinceLastNotification = currentTimestamp - timestampOfLastNotification;
+                    
+                    if(timeSinceLastNotification < 10 * 1000)
+                    {
+                        log('#logs', "too soon since previous notification");
+                        return;
+                    }                    
+                    
+                    console.log("sending notification");
+                    let body = { "value1" : "😀" };
+            
+                    timestampOfLastNotification = Date.now();
+                    
+                    $.post("https://maker.ifttt.com/trigger/Emotion%20Detected%3A/with/key/crAxJRHqlU_bbO8P1K651Hr-hHYE9yk7mFi2AnMg7iI", body);
+
+                    log('#logs', "resetting elapsed time in range");
+                    millisecondsValenceInRange = 0;
+                    previousTimestamp = 0;
+                }
+            }
+            else
+            {
+                log('#logs', "resetting elapsed time in range");
+                millisecondsValenceInRange = 0;
+                previousTimestamp = 0;
+            }
+        }
 
         //Draw the detected facial feature points on the image
         function drawFeaturePoints(img, featurePoints) {
