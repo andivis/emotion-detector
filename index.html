@@ -71,9 +71,15 @@
         var faceMode = affdex.FaceDetectorMode.LARGE_FACES;
         //Construct a CameraDetector and specify the image width / height and face detector mode.
         var detector = new affdex.CameraDetector(divRoot, width, height, faceMode);
+        
+        //notification variables
         var millisecondsValenceInRange = 0;
         var previousTimestamp = 0;
         var timestampOfLastNotification = 0;
+        var valenceThreshold = -10;
+        
+        var minimumMillisecondsInRange = 2000;
+        var millisecondsBetweenNotifications = 10 * 1000;
 
         //Enable detection of all Expressions, Emotions and Emojis classifiers.
         detector.detectAllEmotions();
@@ -99,6 +105,15 @@
                 $("#logs").html("");
                 detector.start();
             }
+            
+            Notification.requestPermission().then(function(result) {
+                console.log(result);
+                
+                if(result === 'granted') {
+                    console.log("notification permission granted");
+                }
+            });
+
             log('#logs', "Clicked the start button");
         }
 
@@ -165,8 +180,7 @@
         
         function sendNotification(faces)
         {
-            //debug less than
-            if(faces[0].emotions && faces[0].emotions.valence > -10)
+            if(faces[0].emotions && faces[0].emotions.valence < valenceThreshold)
             {
                 let currentTimestamp = Date.now();
                 
@@ -180,37 +194,47 @@
                 millisecondsValenceInRange += elapsedTime;                
                 previousTimestamp = currentTimestamp;
                 
-                log('#logs', "elapsed time in range is " + millisecondsValenceInRange);                
+                console.log("elapsed time in range is " + millisecondsValenceInRange);                
                 
-                if(millisecondsValenceInRange >= 2000)
+                if(millisecondsValenceInRange >= minimumMillisecondsInRange)
                 {
                     //to avoid sending too many notifications
                     let timeSinceLastNotification = currentTimestamp - timestampOfLastNotification;
                     
-                    if(timeSinceLastNotification < 10 * 1000)
+                    if(timeSinceLastNotification < millisecondsBetweenNotifications)
                     {
-                        log('#logs', "too soon since previous notification");
+                        console.log("too soon since previous notification");
                         return;
                     }                    
                     
                     console.log("sending notification");
-                    let body = { "value1" : "😀" };
             
                     timestampOfLastNotification = Date.now();
-                    
-                    $.post("https://maker.ifttt.com/trigger/Emotion%20Detected%3A/with/key/dWnOBLrJx211AyzmG7mxf0", body);
+                        
+                    randomNotification(faces[0].emojis.dominantEmoji);
 
-                    log('#logs', "resetting elapsed time in range");
+                    console.log("resetting elapsed time in range");
                     millisecondsValenceInRange = 0;
                     previousTimestamp = 0;
                 }
             }
             else
             {
-                log('#logs', "resetting elapsed time in range");
+                console.log("resetting elapsed time in range");
                 millisecondsValenceInRange = 0;
                 previousTimestamp = 0;
             }
+        }
+
+        function randomNotification(body) {
+            var notifTitle = "Emotion detected";
+            var notifBody = body;
+            var notifImg = 'data/img.jpg';
+            var options = {
+                body: notifBody
+                //icon: notifImg
+            }
+            var notif = new Notification(notifTitle, options);
         }
 
         //Draw the detected facial feature points on the image
