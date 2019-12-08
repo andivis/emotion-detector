@@ -12,7 +12,7 @@ It uses [Affectiva](https://www.affectiva.com/) JS SDK CameraDetector to track d
 
 https://andivis.github.io/ubiquitous-guide/
 
-##Instructions
+## Instructions
 
 1. Press the start button to start the detector.
 2. Allow camera and notification access when asked.
