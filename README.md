@@ -1,4 +1,4 @@
-# ubiquitous-guide
+# Emotion Detector
 
 A web app that detects your current emotion using your webcam.
 
