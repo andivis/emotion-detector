@@ -10,7 +10,7 @@ It uses [Affectiva](https://www.affectiva.com/) JS SDK CameraDetector to track d
 
 ## Demo page
 
-https://andivis.github.io/ubiquitous-guide/
+https://andivis.github.io/emotion-detector/
 
 ## Instructions
 
