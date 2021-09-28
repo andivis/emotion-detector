@@ -1,345 +1,349 @@
 <html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <title>Detect your current emotion using your webcam</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Detect your current emotion using your webcam</title>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta name="robots" content="noindex, nofollow">
-    <meta name="googlebot" content="noindex, nofollow">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta property="og:image" content="social-image.jpg" />
+        <meta property="og:description" content="Detect your current emotion using your webcam" />
+        <link rel="icon" href="icon.png" />
 
-    <script type="text/javascript" src="//code.jquery.com/jquery-3.1.0.js"></script>
+        <script type="text/javascript" src="//code.jquery.com/jquery-3.1.0.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+        <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css" />
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+        <script type="text/javascript" src="https://download.affectiva.com/js/3.2.1/affdex.js"></script>
 
-    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <script type="text/javascript" src="https://download.affectiva.com/js/3.2.1/affdex.js"></script>
+        <style id="compiled-css" type="text/css"></style>
 
-    <style id="compiled-css" type="text/css">
-    </style>
+        <style>
+            li {
+                margin-bottom: 10px;
+            }
 
-    <style>
-        li {
-            margin-bottom: 10px;
-        }
+            body {
+                margin: 15px;
+                font-family: 'Open Sans', sans-serif;
+                font-size: 150%;
+                word-wrap: break-word;
+                background-color: rgb(240, 240, 240);
+            }
 
-        body {
-            margin: 15px;
-            font-family: 'Open Sans', sans-serif;
-            font-size: 150%;
-            word-wrap: break-word;
-            background-color: rgb(240, 240, 240);
-        }
+            button {
+                font-size: 125%;
+                padding: 10px;
+                min-width: 175px;
+            }
 
-        button {
-            font-size: 125%;
-            padding: 10px;
-            min-width: 175px;
-        }
+            button {
+                padding: 15px;
+                border-radius: 3px;
+                border: none;
+                background-color: #58c0d0;
+                transition: color 0.1s ease;
+            }
 
-        button {
-            padding: 15px;
-            border-radius: 3px;
-            border: none;
-            background-color: #58c0d0;
-            transition: color 0.1s ease;
-        }
+            button:hover {
+                background-color: skyblue;
+            }
 
-        button:hover {
-            background-color: skyblue;
-        }
+            #affdex_elements,
+            #face_video,
+            #face_video_canvas {
+                border-radius: 3px;
+            }
+        </style>
+    </head>
 
-        #affdex_elements,
-        #face_video,
-        #face_video_canvas {
-            border-radius: 3px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container-fluid">
-        <h2 style="text-align: center;">Detect Your Current Emotion Using Your Webcam</h2>
-        <div class="row">
-            <div class="col-md-8" id="affdex_elements" style="width:680px;height:480px; border-radius: 50px;"></div>
-            <div class="col-md-4">
-                <div style="height:25em;">
-                    <h3>Emotion Tracking Results</h3>
-                    <div id="results" style="word-wrap:break-word;"></div>
+    <body>
+        <div class="container-fluid">
+            <h2 style="text-align: center">Detect Your Current Emotion Using Your Webcam</h2>
+            <div class="row">
+                <div class="col-md-8" id="affdex_elements" style="width: 680px; height: 480px; border-radius: 50px"></div>
+                <div class="col-md-4">
+                    <div style="height: 25em">
+                        <h3>Emotion Tracking Results</h3>
+                        <div id="results" style="word-wrap: break-word"></div>
+                    </div>
                 </div>
             </div>
+
+            <br />
+
+            <div style="max-width: 600px; margin-left: auto; margin-right: auto">
+                <div style="text-align: center">
+                    <button id="stop" onclick="onStop()">Stop</button>
+                </div>
+                <h3>Instructions</h3>
+                <ol>
+                    <li>Allow camera and notification access when asked.</li>
+                    <li>
+                        Make sure the lighting is good. Look at the camera. Wait until the dots appear on your face. The probabilities of the
+                        different emotions are written to the "Emotion Tracking Results" section.
+                    </li>
+                    <li>
+                        Make a sad or angry face for at least 2 seconds. You'll get a desktop notification. You must wait at least 10 seconds before
+                        getting another notification.
+                    </li>
+                    <li>Press the stop button to end the detector.</li>
+                </ol>
+
+                <div>
+                    <h3>Detector Log Messages</h3>
+                </div>
+                <div id="logs">Log messages will appear here</div>
+            </div>
         </div>
 
-        <br>
+        <!-- TODO: Missing CoffeeScript 2 -->
 
-        <div style="max-width: 600px; margin-left: auto; margin-right: auto;">
-            <div style="text-align: center;">
-                <button id="stop" onclick="onStop()">Stop</button>
-            </div>
-            <h3>Instructions</h3>
-            <ol>
-                <li>Allow camera and notification access when asked.</li>
-                <li>Make sure the lighting is good. Look at the camera. Wait until the dots appear on your face. The probabilities of the different emotions are written to the "Emotion Tracking Results" section.</li>
-                <li>Make a sad or angry face for at least 2 seconds. You'll get a desktop notification. You must wait at least 10 seconds before getting another notification.</li>
-                <li>Press the stop button to end the detector.</li>
-            </ol>
+        <script type="text/javascript">
+            //<![CDATA[
 
-            <div>
-                <h3>Detector Log Messages</h3>
-            </div>
-            <div id="logs">Log messages will appear here</div>
-        </div>
-    </div>
+            // SDK Needs to create video and canvas nodes in the DOM in order to function
+            // Here we are adding those nodes a predefined div.
+            var divRoot = $('#affdex_elements')[0]
+            var width = 640
+            var height = 480
+            var faceMode = affdex.FaceDetectorMode.LARGE_FACES
+            //Construct a CameraDetector and specify the image width / height and face detector mode.
+            var detector = new affdex.CameraDetector(divRoot, width, height, faceMode)
 
-    <!-- TODO: Missing CoffeeScript 2 -->
+            //notification variables
+            var millisecondsValenceInRange = 0
+            var previousTimestamp = 0
+            var timestampOfLastNotification = 0
+            var valenceThreshold = -10
 
-    <script type="text/javascript">
-        //<![CDATA[
+            var minimumMillisecondsInRange = 2000
+            var millisecondsBetweenNotifications = 10 * 1000
 
-        // SDK Needs to create video and canvas nodes in the DOM in order to function
-        // Here we are adding those nodes a predefined div.
-        var divRoot = $("#affdex_elements")[0];
-        var width = 640;
-        var height = 480;
-        var faceMode = affdex.FaceDetectorMode.LARGE_FACES;
-        //Construct a CameraDetector and specify the image width / height and face detector mode.
-        var detector = new affdex.CameraDetector(divRoot, width, height, faceMode);
+            //Enable detection of all Expressions, Emotions and Emojis classifiers.
+            detector.detectAllEmotions()
+            detector.detectAllExpressions()
+            detector.detectAllEmojis()
+            detector.detectAllAppearance()
 
-        //notification variables
-        var millisecondsValenceInRange = 0;
-        var previousTimestamp = 0;
-        var timestampOfLastNotification = 0;
-        var valenceThreshold = -10;
+            //Add a callback to notify when the detector is initialized and ready for runing.
+            detector.addEventListener('onInitializeSuccess', function () {
+                log('#logs', 'The detector reports initialized')
+                //Display canvas instead of video feed because we want to draw the feature points on it
+                $('#face_video_canvas').css('display', 'block')
+                $('#face_video').css('display', 'none')
+            })
 
-        var minimumMillisecondsInRange = 2000;
-        var millisecondsBetweenNotifications = 10 * 1000;
-
-        //Enable detection of all Expressions, Emotions and Emojis classifiers.
-        detector.detectAllEmotions();
-        detector.detectAllExpressions();
-        detector.detectAllEmojis();
-        detector.detectAllAppearance();
-
-        //Add a callback to notify when the detector is initialized and ready for runing.
-        detector.addEventListener("onInitializeSuccess", function() {
-            log('#logs', "The detector reports initialized");
-            //Display canvas instead of video feed because we want to draw the feature points on it
-            $("#face_video_canvas").css("display", "block");
-            $("#face_video").css("display", "none");
-        });
-
-        function log(node_name, msg) {
-            $(node_name).append("<span>" + msg + "</span><br/>")
-        }
-
-        //function executes when Start button is pushed.
-        function onStart() {
-            if (detector && !detector.isRunning) {
-                $("#logs").html("");
-                detector.start();
+            function log(node_name, msg) {
+                $(node_name).append('<span>' + msg + '</span><br/>')
             }
 
-            Notification.requestPermission().then(function(result) {
-                console.log(result);
-
-                if (result === 'granted') {
-                    console.log("notification permission granted");
+            //function executes when Start button is pushed.
+            function onStart() {
+                if (detector && !detector.isRunning) {
+                    $('#logs').html('')
+                    detector.start()
                 }
-            });
 
-            log('#logs', "Starting");
-        }
+                Notification.requestPermission().then(function (result) {
+                    console.log(result)
 
-        $(document).ready(function() {
-            onStart();
-
-            showResults([], null, 0);
-        });
-
-        //function executes when the Stop button is pushed.
-        function onStop() {
-            log('#logs', "Clicked the stop button");
-            if (detector && detector.isRunning) {
-                detector.removeEventListener();
-                detector.stop();
-            }
-        };
-
-        //function executes when the Reset button is pushed.
-        function onReset() {
-            log('#logs', "Clicked the reset button");
-            if (detector && detector.isRunning) {
-                detector.reset();
-
-                $('#results').html("");
-            }
-        };
-
-        //Add a callback to notify when camera access is allowed
-        detector.addEventListener("onWebcamConnectSuccess", function() {
-            log('#logs', "Webcam access allowed");
-        });
-
-        //Add a callback to notify when camera access is denied
-        detector.addEventListener("onWebcamConnectFailure", function() {
-            log('#logs', "webcam denied");
-            console.log("Webcam access denied");
-        });
-
-        //Add a callback to notify when detector is stopped
-        detector.addEventListener("onStopSuccess", function() {
-            log('#logs', "The detector reports stopped");
-            $("#results").html("");
-        });
-
-        //Add a callback to receive the results from processing an image.
-        //The faces object contains the list of the faces detected in an image.
-        //Faces object contains probabilities for all the different expressions, emotions and appearance metrics
-        detector.addEventListener("onImageResultsSuccess", showResults);
-
-        function showResults(faces, image, timestamp) {
-            $('#results').html("");
-
-            log('#results', "Seconds: " + timestamp.toFixed(1) + ". Number of faces found: " + faces.length);
-
-            let face = null;
-
-            if (!faces || faces.length === 0) {
-                face = {
-                    appearance: null,
-                    emotions: null,
-                    expressions: null,
-                    emojis: {
-                        dominantEmoji: ""
+                    if (result === 'granted') {
+                        console.log('notification permission granted')
                     }
-                };
-            } else {
-                face = faces[0];
+                })
+
+                log('#logs', 'Starting')
             }
 
-            log('#results', "<br>Appearance: " + toLine(face.appearance));
-            log('#results', "<br>Emotions: " + toLine(face.emotions));
-            log('#results', "<br>Expressions: " + toLine(face.expressions));
-            log('#results', "<br>Emoji: " + face.emojis.dominantEmoji);
+            $(document).ready(function () {
+                onStart()
 
-            if (face && $('#face_video_canvas')[0] != null) {
-                drawFeaturePoints(image, faces[0].featurePoints);
+                showResults([], null, 0)
+            })
+
+            //function executes when the Stop button is pushed.
+            function onStop() {
+                log('#logs', 'Clicked the stop button')
+                if (detector && detector.isRunning) {
+                    detector.removeEventListener()
+                    detector.stop()
+                }
             }
 
-            sendNotification(faces);
-        }
+            //function executes when the Reset button is pushed.
+            function onReset() {
+                log('#logs', 'Clicked the reset button')
+                if (detector && detector.isRunning) {
+                    detector.reset()
 
-        function toLine(j) {
-            let result = "";
+                    $('#results').html('')
+                }
+            }
 
-            for (var key in j) {
-                let value = j[key];
+            //Add a callback to notify when camera access is allowed
+            detector.addEventListener('onWebcamConnectSuccess', function () {
+                log('#logs', 'Webcam access allowed')
+            })
 
-                if (isNumeric(value)) {
-                    value = value.toFixed(0);
+            //Add a callback to notify when camera access is denied
+            detector.addEventListener('onWebcamConnectFailure', function () {
+                log('#logs', 'webcam denied')
+                console.log('Webcam access denied')
+            })
+
+            //Add a callback to notify when detector is stopped
+            detector.addEventListener('onStopSuccess', function () {
+                log('#logs', 'The detector reports stopped')
+                $('#results').html('')
+            })
+
+            //Add a callback to receive the results from processing an image.
+            //The faces object contains the list of the faces detected in an image.
+            //Faces object contains probabilities for all the different expressions, emotions and appearance metrics
+            detector.addEventListener('onImageResultsSuccess', showResults)
+
+            function showResults(faces, image, timestamp) {
+                $('#results').html('')
+
+                log('#results', 'Seconds: ' + timestamp.toFixed(1) + '. Number of faces found: ' + faces.length)
+
+                let face = null
+
+                if (!faces || faces.length === 0) {
+                    face = {
+                        appearance: null,
+                        emotions: null,
+                        expressions: null,
+                        emojis: {
+                            dominantEmoji: ''
+                        }
+                    }
+                } else {
+                    face = faces[0]
                 }
 
-                result += key + ": " + value + ", ";
-            }
+                log('#results', '<br>Appearance: ' + toLine(face.appearance))
+                log('#results', '<br>Emotions: ' + toLine(face.emotions))
+                log('#results', '<br>Expressions: ' + toLine(face.expressions))
+                log('#results', '<br>Emoji: ' + face.emojis.dominantEmoji)
 
-            return result.slice(0, -2);
-        }
-
-        function isNumeric(n) {
-            return !isNaN(parseFloat(n)) && isFinite(n);
-        }
-
-        function sendNotification(faces) {
-            if (!faces || faces.length === 0) {
-                return;
-            }
-
-            if (faces[0].emotions && faces[0].emotions.valence < valenceThreshold) {
-                let currentTimestamp = Date.now();
-
-                if (!previousTimestamp) {
-                    previousTimestamp = currentTimestamp;
+                if (face && $('#face_video_canvas')[0] != null && faces && faces.length) {
+                    drawFeaturePoints(image, faces[0].featurePoints)
                 }
 
-                let elapsedTime = currentTimestamp - previousTimestamp;
+                sendNotification(faces)
+            }
 
-                millisecondsValenceInRange += elapsedTime;
-                previousTimestamp = currentTimestamp;
+            function toLine(j) {
+                let result = ''
 
-                console.log("elapsed time in range is " + millisecondsValenceInRange);
+                for (var key in j) {
+                    let value = j[key]
 
-                if (millisecondsValenceInRange >= minimumMillisecondsInRange) {
-                    //to avoid sending too many notifications
-                    let timeSinceLastNotification = currentTimestamp - timestampOfLastNotification;
-
-                    if (timeSinceLastNotification < millisecondsBetweenNotifications) {
-                        console.log("too soon since previous notification");
-                        return;
+                    if (isNumeric(value)) {
+                        value = value.toFixed(0)
                     }
 
-                    console.log("sending notification");
-
-                    timestampOfLastNotification = Date.now();
-
-                    displayNotification(faces[0].emojis.dominantEmoji);
-
-                    console.log("resetting elapsed time in range");
-                    millisecondsValenceInRange = 0;
-                    previousTimestamp = 0;
+                    result += key + ': ' + value + ', '
                 }
-            } else {
-                console.log("resetting elapsed time in range");
-                millisecondsValenceInRange = 0;
-                previousTimestamp = 0;
+
+                return result.slice(0, -2)
             }
-        }
 
-        function displayNotification(body) {
-            var notifTitle = "Emotion detected";
-            var notifBody = body;
-            var options = {
-                body: notifBody
+            function isNumeric(n) {
+                return !isNaN(parseFloat(n)) && isFinite(n)
             }
-            var notif = new Notification(notifTitle, options);
-        }
 
-        //Draw the detected facial feature points on the image
-        function drawFeaturePoints(img, featurePoints) {
-            var contxt = $('#face_video_canvas')[0].getContext('2d');
+            function sendNotification(faces) {
+                if (!faces || faces.length === 0) {
+                    return
+                }
 
-            var hRatio = contxt.canvas.width / img.width;
-            var vRatio = contxt.canvas.height / img.height;
-            var ratio = Math.min(hRatio, vRatio);
+                if (faces[0].emotions && faces[0].emotions.valence < valenceThreshold) {
+                    let currentTimestamp = Date.now()
 
-            contxt.strokeStyle = "#FFFFFF";
-            for (var id in featurePoints) {
-                contxt.beginPath();
-                contxt.arc(featurePoints[id].x,
-                    featurePoints[id].y, 2, 0, 2 * Math.PI);
-                contxt.stroke();
+                    if (!previousTimestamp) {
+                        previousTimestamp = currentTimestamp
+                    }
 
+                    let elapsedTime = currentTimestamp - previousTimestamp
+
+                    millisecondsValenceInRange += elapsedTime
+                    previousTimestamp = currentTimestamp
+
+                    console.log('elapsed time in range is ' + millisecondsValenceInRange)
+
+                    if (millisecondsValenceInRange >= minimumMillisecondsInRange) {
+                        //to avoid sending too many notifications
+                        let timeSinceLastNotification = currentTimestamp - timestampOfLastNotification
+
+                        if (timeSinceLastNotification < millisecondsBetweenNotifications) {
+                            console.log('too soon since previous notification')
+                            return
+                        }
+
+                        console.log('sending notification')
+
+                        timestampOfLastNotification = Date.now()
+
+                        displayNotification(faces[0].emojis.dominantEmoji)
+
+                        console.log('resetting elapsed time in range')
+                        millisecondsValenceInRange = 0
+                        previousTimestamp = 0
+                    }
+                } else {
+                    console.log('resetting elapsed time in range')
+                    millisecondsValenceInRange = 0
+                    previousTimestamp = 0
+                }
             }
-        }
 
-        //]]>
-    </script>
+            function displayNotification(body) {
+                var notifTitle = 'Emotion detected'
+                var notifBody = body
+                var options = {
+                    body: notifBody
+                }
+                var notif = new Notification(notifTitle, options)
+            }
 
-    <script>
-        // tell the embed parent frame the height of the content
-        if (window.parent && window.parent.parent) {
-            window.parent.parent.postMessage(["resultsFrame", {
-                height: document.body.getBoundingClientRect().height,
-                slug: "opyh5e8d"
-            }], "*")
-        }
+            //Draw the detected facial feature points on the image
+            function drawFeaturePoints(img, featurePoints) {
+                var contxt = $('#face_video_canvas')[0].getContext('2d')
 
-        // always overwrite window.name, in case users try to set it manually
-        window.name = "result"
-    </script>
+                var hRatio = contxt.canvas.width / img.width
+                var vRatio = contxt.canvas.height / img.height
+                var ratio = Math.min(hRatio, vRatio)
 
-</body>
+                contxt.strokeStyle = '#FFFFFF'
+                for (var id in featurePoints) {
+                    contxt.beginPath()
+                    contxt.arc(featurePoints[id].x, featurePoints[id].y, 2, 0, 2 * Math.PI)
+                    contxt.stroke()
+                }
+            }
 
+            //]]>
+        </script>
+
+        <script>
+            // tell the embed parent frame the height of the content
+            if (window.parent && window.parent.parent) {
+                window.parent.parent.postMessage(
+                    [
+                        'resultsFrame',
+                        {
+                            height: document.body.getBoundingClientRect().height,
+                            slug: 'opyh5e8d'
+                        }
+                    ],
+                    '*'
+                )
+            }
+
+            // always overwrite window.name, in case users try to set it manually
+            window.name = 'result'
+        </script>
+    </body>
 </html>
